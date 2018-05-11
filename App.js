@@ -1,8 +1,6 @@
 import React from 'react';
-import { Platform, StyleSheet, View, ScrollView, Text,  } from 'react-native';
-import SearchBar from './components/SearchBar';
-import LabelValue from './components/LabelValue';
-import Grid from './components/Grid';
+import { Platform, StyleSheet, View, ScrollView, Text, } from 'react-native';
+import { SearchBar, Grid, LabelValue } from './components';
 
 export default class App extends React.Component {
 
