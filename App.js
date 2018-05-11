@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View, } from 'react-native';
+import { Platform, StyleSheet, View, ScrollView, Text,  } from 'react-native';
 import SearchBar from './components/SearchBar';
 import LabelValue from './components/LabelValue';
 import Grid from './components/Grid';
@@ -8,7 +8,7 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { placa: 'wen8287', nombre: '', total: '', loading: false };
+    this.state = { placa: 'ABC1234', nombre: '', total: '', loading: false };
   }
 
   onTextChanged = (placa) => {
@@ -58,7 +58,7 @@ export default class App extends React.Component {
 
         <SearchBar plate={this.state.placa.toUpperCase()} onChange={this.onTextChanged.bind(this)} onSearch={this.onSearch.bind(this)} />
 
-        <View style={styles.result}>
+        <ScrollView style={styles.result}>
           {this.state.loading ? <LabelValue value='...buscando...' /> :
             <View>
               {!!this.state.nombre && <LabelValue label='Propietario' value={this.state.nombre} />}
@@ -71,10 +71,10 @@ export default class App extends React.Component {
                 )
               }
 
-              {!!this.state.total && <LabelValue label={'Total a Pagar (' + this.state.multas.length + ' multas)'} value={this.state.total} />}
+              {!!this.state.total && <LabelValue label={'Total a Pagar (' + this.state.multas.length + ' multas)'} value={this.state.total} footnote='incluye donativos y descuentos' />}
 
             </View>}
-        </View>
+        </ScrollView>
 
       </View>
     );

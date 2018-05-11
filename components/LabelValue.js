@@ -7,11 +7,12 @@ export default class LabelValue extends React.Component {
     }
 
     render() {
-        let { label, value } = this.props;
+        let { label, value, footnote } = this.props;
         return (
             <View>
                 {!!label && <Text style={styles.label}>{label}: </Text>}
                 {!!value && <Text style={styles.textValue}>{value}</Text>}
+                {!!footnote && <Text style={styles.footnote}>{footnote}</Text>}
             </View>
         )
     }
@@ -31,5 +32,10 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    footnote: {
+        fontSize: 12,
+        color: 'white',
+        textAlign: 'right',
     }
 });
