@@ -1,106 +1,80 @@
 import React from 'react';
-import { Platform, StyleSheet, Text, View, TextInput, Button, WebView } from 'react-native';
+import { Platform, StyleSheet, Text, View, } from 'react-native';
+import SearchBar from './components/SearchBar';
+import LabelValue from './components/LabelValue';
+import Grid from './components/Grid';
 
 export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { text: 'ABC1234', html: '', nombre: '', total: '', loading: false };
+    this.state = { placa: 'wen8287', nombre: '', total: '', loading: false };
   }
 
-  onTextChanged = (text) => {
-    this.setState({ text, html: '', nombre: '', total: '' });
+  onTextChanged = (placa) => {
+    this.setState({ placa, nombre: '', multas: undefined, total: '' });
   }
 
   onSearch = () => {
-    // remove focus to hide keyboard when button pressed
-    if (this.refs.searchInput.isFocused())
-      this.refs.searchInput.blur();
-
     // clear state and set loading
-    this.setState({ html: '', nombre: '', total: '', loading: true });
+    this.setState({ nombre: '', multas: undefined, total: '', loading: true });
 
-    fetch('https://www.hermosillo.gob.mx:444/ServicioTemporal/Proyectos2008/Multas/DetalleMulta.aspx?pPlaca=' + this.state.text, {
+    fetch('https://www.hermosillo.gob.mx:444/ServicioTemporal/Proyectos2008/Multas/DetalleMulta.aspx?pPlaca=' + this.state.placa, {
       method: 'post',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8' }
     }).then(response => {
       response.text().then(text => {
+        const cheerio = require('cheerio-without-node-native')
+        const $ = cheerio.load(text);
 
-        // get propietario using ugly regex
-        const rgxNam = new RegExp("id=\"lblNombre\".*?=\"(.*?)\".*?/>");
-        let name = '';
-        if (rgxNam.test(text))
-          name = rgxNam.exec(text)[1];
+        let nombre = $('#lblNombre').val();
+        let total = $('#Totalpagar').val();
+        let multas = [];
 
-        // multiline regex to get the total
-        const rgxTot = new RegExp("id=\"Totalpagar\"[\\S\\s]*?value=\"(.*?)\"", "m");
-        let total = name ? '$0.00' : '';
-        if (rgxTot.test(text))
-          total = rgxTot.exec(text)[1];
-
-        // remove span (& spam?) messages
-        newtext = text.replace("<div id=\"DivMensajesNoExiste\">", "<div id=\"DivMensajesNoExiste\" style=\"display: none;\">")
-          .replace("<div id=\"DivMensajesinConexion\">", "<div id=\"DivMensajesinConexion\" style=\"display: none;\">")
-          .replace("<div id=\"DivPendienteProcesar\">", "<div id=\"DivPendienteProcesar\" style=\"display: none;\">")
-          .replace("<div id=\"DivBloqueado\">", "<div id=\"DivBloqueado\" style=\"display: none;\">")
-          .replace("<div id=\"DivConciliacion\">", "<div id=\"DivConciliacion\" style=\"display: none;\">")
-          .replace("<div id=\"DivCiudadanoCumplido\">", "<div id=\"DivCiudadanoCumplido\" style=\"display: none;\">")
-          .replace("<div id=\"divRecibos\">", "<div id=\"divRecibos\" style=\"display: none;\">")
-          .replace("alt=\"/images/fondos/linea01.jpg\"", "")
-          .replace("<div id=\"Div2\" width: \"650px\">", "<div id=\"Div2\" width: \"650px\" style=\"display: none;\">")
-          .replace("<div id=\"DivPagar\">", "<div id=\"DivPagar\" style=\"display: none;\">");
+        $('tr', '#GridView1').nextAll().each(function (i, element) {
+          row = $(element).children();
+          if (row.length > 8) {
+            let multa = []
+            multa.push(row.eq(2).text());
+            multa.push(row.eq(1).text());
+            multa.push(row.eq(7).text().trim());
+            multas.push(multa);
+          }
+        });
 
         // update state, remove loading
-        this.setState({ html: newtext, nombre: name, total: total, loading: false });
+        this.setState({ nombre, multas, total, loading: false });
       })
     })
   }
 
   render() {
+
+    let gridColumnNames = ['fecha', 'concepto', 'importe'];
+    let gridColumnWidths = ['22%', '58%', '20%'];
+
     return (
       <View style={styles.container}>
-        <View style={styles.topbar}>
-          <Text style={styles.label}>Placa:</Text>
-          <TextInput
-            ref="searchInput"
-            caretHidden
-            selectTextOnFocus
-            autoCapitalize='characters'
-            selectionColor={'transparent'}
-            returnKeyType='search'
-            underlineColorAndroid='transparent'
-            style={styles.input}
-            placeholder='ABC1234'
-            placeholderTextColor='silver'
-            maxLength={8}
-            value={this.state.text.toUpperCase()}
-            onChangeText={this.onTextChanged}
-            onSubmitEditing={this.onSearch.bind(this)}
-            onFocus={() => this.refs.searchInput.clear()}
-          ></TextInput>
-          <Button title="Buscar" onPress={this.onSearch.bind(this)} />
-        </View>
+
+        <SearchBar plate={this.state.placa.toUpperCase()} onChange={this.onTextChanged.bind(this)} onSearch={this.onSearch.bind(this)} />
+
         <View style={styles.result}>
+          {this.state.loading ? <LabelValue value='...buscando...' /> :
+            <View>
+              {!!this.state.nombre && <LabelValue label='Propietario' value={this.state.nombre} />}
 
-          {!!this.state.loading && <Text style={styles.resultText}>...buscando...</Text>}
+              {!!this.state.multas &&
+                (
+                  this.state.multas.length == 0 ?
+                    <LabelValue value='-sin multas-' /> :
+                    <Grid titles={gridColumnNames} values={this.state.multas} widths={gridColumnWidths} />
+                )
+              }
 
-          {!!this.state.nombre && <View>
-            <Text style={styles.label}>Propietario: </Text>
-            <Text style={styles.resultText}>{this.state.nombre}</Text>
-          </View>
-          }
+              {!!this.state.total && <LabelValue label={'Total a Pagar (' + this.state.multas.length + ' multas)'} value={this.state.total} />}
 
-          {!!this.state.total && <View>
-            <Text style={styles.label}>Total a Pagar: </Text>
-            <Text style={styles.resultText}>{this.state.total}</Text>
-          </View>
-          }
-
+            </View>}
         </View>
-        <WebView style={styles.webview} source={{ html: this.state.html }}
-          injectedJavaScript={`const meta = document.createElement('meta'); meta.setAttribute('content', 'width=device-width, initial-scale=0.42, maximum-scale=1, user-scalable=1'); meta.setAttribute('name', 'viewport'); document.getElementsByTagName('head')[0].appendChild(meta); `}
-          scalesPageToFit={false}
-        ></WebView>
 
       </View>
     );
@@ -110,39 +84,16 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'deepskyblue',
     justifyContent: 'flex-start',
     // IMPORTANT!! fixes statusBar height problem on Android Expo 
     //REMOVE IF EJECTING (causes apk to force close)
     paddingTop: Platform.OS === 'ios' ? 0 : Expo.Constants.statusBarHeight,
   },
-  topbar: {
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'dodgerblue',
-  },
   result: {
     flexDirection: 'column',
     backgroundColor: 'deepskyblue',
     padding: 10,
-  },
-  webview: {
-  },
-  input: {
-    fontSize: 20,
-    minWidth: '25%',
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: 'gold',
-    textShadowColor: 'steelblue',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 2,
   },
   resultText: {
     fontSize: 18,
