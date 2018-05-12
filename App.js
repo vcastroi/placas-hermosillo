@@ -8,7 +8,7 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.cleanState = { datos: undefined, nombre: undefined, multas: [], total: undefined }
-    this.state = { ...this.cleanState, placa: 'WEN8287', loading: false };
+    this.state = { ...this.cleanState, placa: 'ABC1234', loading: false };
   }
 
   onTextChanged = (placa) => {
