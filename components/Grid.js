@@ -36,9 +36,19 @@ export default class Grid extends React.Component {
 const styles = StyleSheet.create({
     grid: {
         flexDirection: 'column',
-        paddingTop: 15,
-        paddingBottom: 15,
+        marginTop: 15,
+        marginBottom: 15,
         elevation: 4,
+        backgroundColor: 'white',
+
+        borderColor: 'dodgerblue',
+        borderStyle: 'solid',
+        borderBottomWidth: 1,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderBottomLeftRadius: 10,
+        borderTopRightRadius: 10,
+        overflow: 'hidden',
     },
     columnTitles: {
         padding: 10,
@@ -46,18 +56,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: 'dodgerblue',
-        //borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
     },
     rows: {
         flexDirection: 'column',
-        borderColor: 'dodgerblue',
-        borderStyle: 'solid',
-        borderBottomWidth: 1,
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-        borderBottomLeftRadius: 10,
-        overflow: 'hidden',
     },
     columnValues: {
         padding: 5,
