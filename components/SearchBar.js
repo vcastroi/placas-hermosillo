@@ -36,6 +36,7 @@ export default class SearchBar extends React.Component {
                     onFocus={() => { this.refs.searchInput.clear(); onChange(''); }}
                 />
                 <Button
+                    color='#ed6f00'
                     title="Buscar"
                     onPress={this.onStartSearch.bind(this)}
                 />
@@ -50,20 +51,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'dodgerblue',
+        backgroundColor: '#1E88E5',
+        elevation: 8,
     },
     input: {
-        fontSize: 20,
+        fontSize: 22,
         minWidth: '25%',
         fontWeight: 'bold',
         color: 'white',
     },
     label: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: 'gold',
-        textShadowColor: 'steelblue',
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 2,
+        fontSize: 18,
+        //fontWeight: 'bold', 
+        color: 'white',
+        //textShadowColor: 'steelblue',
+        //textShadowOffset: { width: -1, height: 1 },
+        //textShadowRadius: 2,
     },
 });

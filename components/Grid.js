@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         paddingTop: 15,
         paddingBottom: 15,
+        elevation: 4,
     },
     columnTitles: {
         padding: 10,
@@ -45,11 +46,18 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: 'dodgerblue',
-        borderTopLeftRadius: 10,
+        //borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
     },
     rows: {
         flexDirection: 'column',
+        borderColor: 'dodgerblue',
+        borderStyle: 'solid',
+        borderBottomWidth: 1,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderBottomLeftRadius: 10,
+        overflow: 'hidden',
     },
     columnValues: {
         padding: 5,
@@ -61,10 +69,10 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: 'gold',
-        textShadowColor: 'steelblue',
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 2,
+        color: '#FFE0B2',
+        //textShadowColor: 'steelblue',
+        //textShadowOffset: { width: -1, height: 1 },
+        //textShadowRadius: 2,
     },
     textValue: {
         fontSize: 12,

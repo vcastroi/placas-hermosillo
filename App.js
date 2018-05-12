@@ -1,21 +1,23 @@
 import React from 'react';
 import { Platform, StyleSheet, View, ScrollView, Text, } from 'react-native';
-import { SearchBar, Grid, LabelValue } from './components';
+import { SearchBar, Grid, LabelValue, Message } from './components';
 
 export default class App extends React.Component {
 
+
   constructor(props) {
     super(props);
-    this.state = { placa: 'ABC1234', nombre: '', total: '', loading: false };
+    this.cleanState = { datos: undefined, nombre: undefined, multas: [], total: undefined }
+    this.state = { ...this.cleanState, placa: 'WEN8287', loading: false };
   }
 
   onTextChanged = (placa) => {
-    this.setState({ placa, nombre: '', multas: undefined, total: '' });
+    this.setState({ ...this.cleanState, placa });
   }
 
   onSearch = () => {
     // clear state and set loading
-    this.setState({ nombre: '', multas: undefined, total: '', loading: true });
+    this.setState({ ...this.cleanState, loading: true });
 
     fetch('https://www.hermosillo.gob.mx:444/ServicioTemporal/Proyectos2008/Multas/DetalleMulta.aspx?pPlaca=' + this.state.placa, {
       method: 'post',
@@ -25,6 +27,7 @@ export default class App extends React.Component {
         const cheerio = require('cheerio-without-node-native')
         const $ = cheerio.load(text);
 
+        let datos = $('#txtDatos').text().replace('PLACA: ', '').replace(this.state.placa + ', ', '');
         let nombre = $('#lblNombre').val();
         let total = $('#Totalpagar').val();
         let multas = [];
@@ -41,7 +44,7 @@ export default class App extends React.Component {
         });
 
         // update state, remove loading
-        this.setState({ nombre, multas, total, loading: false });
+        this.setState({ datos, nombre, multas, total, loading: false });
       })
     })
   }
@@ -57,21 +60,23 @@ export default class App extends React.Component {
         <SearchBar plate={this.state.placa.toUpperCase()} onChange={this.onTextChanged.bind(this)} onSearch={this.onSearch.bind(this)} />
 
         <ScrollView style={styles.result}>
-          {this.state.loading ? <LabelValue value='...buscando...' /> :
-            <View>
-              {!!this.state.nombre && <LabelValue label='Propietario' value={this.state.nombre} />}
-
-              {!!this.state.multas &&
-                (
+          {this.state.loading ? <Message value='...buscando...' /> :
+            (!this.state.datos ? <Message value='- sin resultados -' /> :
+              <View>
+                <Message value={this.state.datos} />
+                <LabelValue label='Propietario' value={this.state.nombre} />
+                {
                   this.state.multas.length == 0 ?
-                    <LabelValue value='-sin multas-' /> :
+                    <Message value='- sin multas -' /> :
                     <Grid titles={gridColumnNames} values={this.state.multas} widths={gridColumnWidths} />
-                )
-              }
-
-              {!!this.state.total && <LabelValue label={'Total a Pagar (' + this.state.multas.length + ' multas)'} value={this.state.total} footnote='incluye donativos y descuentos' />}
-
-            </View>}
+                }
+                {this.state.total && <LabelValue
+                  label={'Total a Pagar (' + this.state.multas.length + ' multas)'}
+                  value={this.state.total}
+                  footnote='incluye donativos y descuentos'
+                />}
+              </View>
+            )}
         </ScrollView>
 
       </View>
@@ -90,13 +95,7 @@ const styles = StyleSheet.create({
   },
   result: {
     flexDirection: 'column',
-    backgroundColor: 'deepskyblue',
+    backgroundColor: 'white',
     padding: 10,
   },
-  resultText: {
-    fontSize: 18,
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
 });
